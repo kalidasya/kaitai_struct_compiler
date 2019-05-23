@@ -318,10 +318,18 @@ class ClassCompiler(
     instSpec match {
       case vi: ValueInstanceSpec =>
         lang.attrParseIfHeader(instName, vi.ifExpr)
+        lang.instancePeekHeader(instName, lang.normalIO, vi.peek)
         lang.instanceCalculate(instName, dataType, vi.value)
+        lang.instancePeekFooter(instName, lang.normalIO, vi.peek)
         lang.attrParseIfFooter(vi.ifExpr)
       case i: ParseInstanceSpec =>
+        val io = i.io match {
+          case None => lang.normalIO
+          case Some(ex) => lang.useIO(ex)
+        }
+        lang.instancePeekHeader(instName, lang.normalIO, i.peek)
         lang.attrParse(i, instName, endian)
+        lang.instancePeekFooter(instName, lang.normalIO, i.peek)
     }
 
     lang.instanceSetCalculated(instName)

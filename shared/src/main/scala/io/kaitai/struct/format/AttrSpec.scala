@@ -74,6 +74,7 @@ case class AttrSpec(
 case class YamlAttrArgs(
   size: Option[Ast.expr],
   sizeEos: Boolean,
+  peek: Boolean,
   encoding: Option[String],
   terminator: Option[Int],
   include: Boolean,
@@ -115,7 +116,8 @@ object AttrSpec {
     "consume",
     "include",
     "eos-error",
-    "repeat"
+    "repeat",
+    "peek"
   )
 
   val LEGAL_KEYS_BYTES = Set(
@@ -169,6 +171,7 @@ object AttrSpec {
     val contents = srcMap.get("contents").map(parseContentSpec(_, path ++ List("contents")))
     val size = ParseUtils.getOptValueExpression(srcMap, "size", path)
     val sizeEos = ParseUtils.getOptValueBool(srcMap, "size-eos", path).getOrElse(false)
+    val peek = ParseUtils.getOptValueBool(srcMap, "peek", path).getOrElse(false)
     val ifExpr = ParseUtils.getOptValueExpression(srcMap, "if", path)
     val encoding = ParseUtils.getOptValueStr(srcMap, "encoding", path)
     val terminator = ParseUtils.getOptValueInt(srcMap, "terminator", path)
@@ -182,7 +185,7 @@ object AttrSpec {
     val typObj = srcMap.get("type")
 
     val yamlAttrArgs = YamlAttrArgs(
-      size, sizeEos,
+      size, sizeEos, peek,
       encoding, terminator, include, consume, eosError, padRight,
       contents, enum, parent, process
     )

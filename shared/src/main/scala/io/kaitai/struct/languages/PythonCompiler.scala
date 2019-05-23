@@ -434,6 +434,14 @@ class PythonCompiler(typeProvider: ClassTypeProvider, config: RuntimeConfig)
     out.puts
   }
 
+  override def savePosition(io: String): Unit = {
+    out.puts(s"pos = $io.pos()")
+  }
+
+  override def resetPosition(io: String): Unit = {
+    out.puts(s"$io.seek(pos)")
+  }
+
   override def instanceReturn(instName: InstanceIdentifier, attrType: DataType): Unit = {
     // not very efficient, probably should be some other way to do that, but for now it will do:
     // workaround to avoid Python generating an "AttributeError: instance has no attribute"

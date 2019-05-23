@@ -12,6 +12,7 @@ case class ValueInstanceSpec(
   private val _doc: DocSpec,
   value: Ast.expr,
   ifExpr: Option[Ast.expr],
+  peek: Option[Boolean],
   var dataType: Option[DataType]
 ) extends InstanceSpec(_doc) {
   override def dataTypeComposite = dataType.get
@@ -22,6 +23,7 @@ case class ParseInstanceSpec(
   path: List[String],
   private val _doc: DocSpec,
   dataType: DataType,
+  peek: Option[Boolean],
   cond: ConditionalSpec,
   pos: Option[Ast.expr],
   io: Option[Ast.expr]
@@ -35,7 +37,8 @@ object InstanceSpec {
     "doc",
     "doc-ref",
     "enum",
-    "if"
+    "if",
+    "peek"
   )
 
   def fromYaml(src: Any, path: List[String], metaDef: MetaSpec, id: InstanceIdentifier): InstanceSpec = {
@@ -54,6 +57,7 @@ object InstanceSpec {
             Ast.expr.EnumById(Ast.identifier(enumName), value)
         }
 
+        val peek = ParseUtils.getOptValueBool(srcMap, "peek", path)
         val ifExpr = ParseUtils.getOptValueExpression(srcMap, "if", path)
 
         ValueInstanceSpec(
@@ -61,16 +65,18 @@ object InstanceSpec {
           DocSpec.fromYaml(srcMap, path),
           value2,
           ifExpr,
+          peek,
           None
         )
       case None =>
         // normal positional instance
         val pos = ParseUtils.getOptValueExpression(srcMap, "pos", path)
         val io = ParseUtils.getOptValueExpression(srcMap, "io", path)
+        val peek = ParseUtils.getOptValueBool(srcMap, "peek", path)
 
         val fakeAttrMap = srcMap.filterKeys((key) => key != "pos" && key != "io")
         val a = AttrSpec.fromYaml(fakeAttrMap, path, metaDef, id)
-        ParseInstanceSpec(id, path, a.doc, a.dataType, a.cond, pos, io)
+        ParseInstanceSpec(id, path, a.doc, a.dataType, peek, a.cond, pos, io)
     }
   }
 }
